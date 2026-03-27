@@ -1,35 +1,33 @@
 ---
 title: ""
+format:
+  html:
+    toc: false
 ---
 
-::: {.hero}
+```{=html}
+<div class="hero">
+  <h1>FA3 — Interactive Tools</h1>
+  <p class="subtitle">Financial Accounting 3 · Amsterdam Business School · University of Amsterdam</p>
 
-# FA3 — Interactive Tools
+  <div class="tool-grid">
+    <a href="bond-amortization.html" class="tool-card">
+      <div class="icon">📊</div>
+      <h3>Bond Amortization Schedule</h3>
+      <p>Build and explore effective-interest amortization tables for bonds issued at a premium or discount.</p>
+    </a>
 
-::: {.subtitle}
-Financial Accounting 3 · Amsterdam Business School · University of Amsterdam
-:::
+    <a href="dcf-timeline.html" class="tool-card">
+      <div class="icon">📐</div>
+      <h3>DCF Timeline Generator</h3>
+      <p>Visualize discounted cash flow timelines — map out coupon payments, principal, and present values.</p>
+    </a>
 
-::: {.tool-grid}
-
-<a href="bond-amortization.html" class="tool-card">
-<div class="icon">📊</div>
-<h3>Bond Amortization Schedule</h3>
-<p>Build and explore effective-interest amortization tables for bonds issued at a premium or discount.</p>
-</a>
-
-<a href="dcf-timeline.html" class="tool-card">
-<div class="icon">📐</div>
-<h3>DCF Timeline Generator</h3>
-<p>Visualize discounted cash flow timelines — map out coupon payments, principal, and present values.</p>
-</a>
-
-<a href="impairment-ecl.html" class="tool-card">
-<div class="icon">⚠️</div>
-<h3>Impairment — Expected Credit Loss</h3>
-<p>Walk through the IFRS 9 expected credit loss model with interactive staging and calculations.</p>
-</a>
-
-:::
-
-:::
+    <a href="impairment-ecl.html" class="tool-card">
+      <div class="icon">⚠️</div>
+      <h3>Impairment — Expected Credit Loss</h3>
+      <p>Walk through the IFRS 9 expected credit loss model with interactive staging and calculations.</p>
+    </a>
+  </div>
+</div>
+```

@@ -1,9 +1,11 @@
 ---
-title: "DCF Timeline Generator"
+title: ""
+format:
+  html:
+    toc: false
 ---
 
+```{=html}
 <iframe class="tool-embed" src="tools/DCF-Timeline-V0.html"></iframe>
-
-::: {.embed-note}
-If the tool does not load, [open it directly](tools/DCF-Timeline-V0.html){target="_blank"}.
-:::
+<p class="embed-note">If the tool does not load, <a href="tools/DCF-Timeline-V0.html" target="_blank">open it directly</a>.</p>
+```

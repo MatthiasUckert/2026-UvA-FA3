@@ -4,26 +4,26 @@
     "href": "index.html",
     "title": "FA3 — Interactive Tools",
     "section": "",
-    "text": "FA3 — Interactive Tools\n\nFinancial Accounting 3 · Amsterdam Business School · University of Amsterdam\n\n\n\n\n📊\n\n\nBond Amortization Schedule\n\n\nBuild and explore effective-interest amortization tables for bonds issued at a premium or discount.\n\n\n\n\n📐\n\n\nDCF Timeline Generator\n\n\nVisualize discounted cash flow timelines — map out coupon payments, principal, and present values.\n\n\n\n\n⚠️\n\n\nImpairment — Expected Credit Loss\n\n\nWalk through the IFRS 9 expected credit loss model with interactive staging and calculations."
+    "text": "Financial Accounting 3 · Amsterdam Business School · University of Amsterdam\n\n  \n    \n      📊\n      Bond Amortization Schedule\n      Build and explore effective-interest amortization tables for bonds issued at a premium or discount.\n    \n\n    \n      📐\n      DCF Timeline Generator\n      Visualize discounted cash flow timelines — map out coupon payments, principal, and present values.\n    \n\n    \n      ⚠️\n      Impairment — Expected Credit Loss\n      Walk through the IFRS 9 expected credit loss model with interactive staging and calculations."
   },
   {
     "objectID": "impairment-ecl.html",
     "href": "impairment-ecl.html",
-    "title": "Impairment — Expected Credit Loss",
+    "title": "FA3 — Interactive Tools",
     "section": "",
     "text": "If the tool does not load, open it directly."
   },
   {
     "objectID": "dcf-timeline.html",
     "href": "dcf-timeline.html",
-    "title": "DCF Timeline Generator",
+    "title": "FA3 — Interactive Tools",
     "section": "",
     "text": "If the tool does not load, open it directly."
   },
   {
     "objectID": "bond-amortization.html",
     "href": "bond-amortization.html",
-    "title": "Bond Amortization Schedule",
+    "title": "FA3 — Interactive Tools",
     "section": "",
     "text": "If the tool does not load, open it directly."
   }
