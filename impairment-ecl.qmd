@@ -1,0 +1,9 @@
+---
+title: "Impairment — Expected Credit Loss"
+---
+
+<iframe class="tool-embed" src="tools/Impairment-ECL.html"></iframe>
+
+::: {.embed-note}
+If the tool does not load, [open it directly](tools/Impairment-ECL.html){target="_blank"}.
+:::

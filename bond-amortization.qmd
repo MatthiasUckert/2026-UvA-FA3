@@ -1,0 +1,9 @@
+---
+title: "Bond Amortization Schedule"
+---
+
+<iframe class="tool-embed" src="tools/Bond-Amortization-Schedule-V1.html"></iframe>
+
+::: {.embed-note}
+If the tool does not load, [open it directly](tools/Bond-Amortization-Schedule-V1.html){target="_blank"}.
+:::

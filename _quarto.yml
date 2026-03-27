@@ -1,0 +1,31 @@
+project:
+  type: website
+  output-dir: docs
+  resources:
+    - "tools/**"
+  post-render:
+    - "touch docs/.nojekyll"
+
+website:
+  title: "FA3 — Interactive Tools"
+  navbar:
+    background: "#1a2744"
+    foreground: "#ffffff"
+    left:
+      - text: "Home"
+        href: index.qmd
+      - text: "Bond Amortization"
+        href: bond-amortization.qmd
+      - text: "DCF Timeline"
+        href: dcf-timeline.qmd
+      - text: "Impairment & ECL"
+        href: impairment-ecl.qmd
+  page-footer:
+    center: "Financial Accounting 3 — Amsterdam Business School, University of Amsterdam"
+    background: "#1a2744"
+
+format:
+  html:
+    theme: flatly
+    css: styles.css
+    toc: false

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Impairment — Expected Credit Loss — FA3</title>
+<style>
+  :root {
+    --navy: #1a2744;
+    --teal: #0d9488;
+    --teal-dark: #0f766e;
+    --rose: #be123c;
+    --rose-light: #fff1f2;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --slate: #475569;
+    --slate-light: #94a3b8;
+    --border: #e2e8f0;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --success-bg: #f0fdf4;
+    --success-text: #166534;
+    --error-bg: #fef2f2;
+    --error-text: #991b1b;
+    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-serif: Georgia, 'Times New Roman', serif;
+    --font-mono: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--navy);
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  .wrapper { max-width: 1200px; margin: 0 auto; }
+
+  .header { margin-bottom: 24px; }
+  .header h1 {
+    font-family: var(--font-serif);
+    font-size: 28px; font-weight: 700; color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .header p { font-size: 13px; color: var(--slate-light); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 290px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+    .controls { position: static !important; }
+  }
+
+  .panel {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+
+  .controls { position: sticky; top: 16px; }
+
+  .section-label {
+    font-size: 10px; font-weight: 700; color: var(--slate-light);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .divider { border: none; border-top: 1px solid #f1f5f9; margin: 16px 0; }
+
+  .fields { display: grid; gap: 12px; }
+  .field label {
+    display: block; font-size: 10px; font-weight: 700;
+    color: var(--slate-light); text-transform: uppercase;
+    letter-spacing: 0.05em; margin-bottom: 4px;
+  }
+  .field input, .field select {
+    width: 100%; padding: 8px 10px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: inherit; color: var(--navy);
+    outline: none; transition: border-color 0.15s;
+    background: var(--card);
+  }
+  .field input:focus, .field select:focus { border-color: var(--teal); }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .row-curr { display: grid; grid-template-columns: 62px 1fr; gap: 8px; }
+
+  .group-label {
+    font-size: 11px; font-weight: 700; color: var(--navy);
+    margin-bottom: 6px; margin-top: 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .toggles { display: grid; gap: 10px; }
+  .toggle {
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; font-size: 13px; color: var(--slate);
+    user-select: none;
+  }
+  .toggle input { width: 16px; height: 16px; accent-color: var(--teal); cursor: pointer; }
+
+  .actions { display: grid; gap: 8px; }
+  .action-btn {
+    padding: 10px 16px; border-radius: 8px; border: none;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: all 0.15s; color: #fff;
+  }
+  .action-btn:active { transform: scale(0.97); }
+  .btn-teal { background: var(--teal); }
+  .btn-teal:hover { background: var(--teal-dark); }
+  .btn-navy { background: var(--navy); }
+  .btn-navy:hover { background: #0f172a; }
+
+  .toast {
+    margin-top: 12px; padding: 8px 12px; border-radius: 8px;
+    font-size: 12px; font-weight: 500; text-align: center;
+    animation: fadeIn 0.2s; display: none;
+  }
+  .toast.success { background: var(--success-bg); color: var(--success-text); }
+  .toast.error { background: var(--error-bg); color: var(--error-text); }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  /* ── Table area ── */
+  .table-wrap { padding: 20px; overflow-x: auto; }
+
+  .schedule-title {
+    font-family: var(--font-serif);
+    font-size: 17px; font-weight: 700; color: var(--navy);
+    text-align: center; margin-bottom: 2px;
+  }
+  .schedule-subtitle {
+    font-size: 13px; color: var(--slate); text-align: center; margin-bottom: 14px;
+  }
+
+  /* ── Main table ── */
+  table.impairment {
+    width: 100%; border-collapse: collapse;
+    font-size: 13px; min-width: 760px;
+  }
+
+  table.impairment thead th {
+    padding: 0; text-align: center;
+    font-weight: 600; font-size: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  /* Group header row */
+  table.impairment thead tr.group-row th {
+    background: var(--navy); color: #fff;
+    padding: 8px 10px; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  table.impairment thead tr.group-row th.col-date { border-radius: 8px 0 0 0; }
+  table.impairment thead tr.group-row th:last-child { border-radius: 0 8px 0 0; }
+
+  table.impairment thead tr.group-row th.grp-contractual { background: var(--navy); }
+  table.impairment thead tr.group-row th.grp-expected { background: #1e3a5f; }
+  table.impairment thead tr.group-row th.grp-loss { background: var(--rose); }
+
+  /* Sub-header row */
+  table.impairment thead tr.sub-row th {
+    background: #f1f5f9; color: var(--slate);
+    padding: 6px 10px; font-size: 11px; font-weight: 600;
+    border-bottom: 2px solid var(--navy);
+    border-right: 1px solid var(--border);
+  }
+  table.impairment thead tr.sub-row th.sub-loss {
+    color: var(--rose);
+  }
+
+  /* Separator columns */
+  table.impairment .sep {
+    width: 4px; padding: 0; border: none;
+    background: var(--bg);
+  }
+
+  table.impairment tbody td {
+    padding: 8px 12px; text-align: right;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid #f1f5f9;
+    font-family: var(--font-mono); font-size: 12.5px;
+    transition: background 0.15s;
+  }
+  table.impairment tbody td:first-child {
+    text-align: left; font-family: var(--font-sans); font-weight: 500;
+  }
+  table.impairment tbody td.sep {
+    background: var(--bg); border-bottom: none; border-right: none;
+  }
+
+  table.impairment tbody tr:hover { background: #f8fafc; }
+  table.impairment tbody tr { cursor: pointer; }
+
+  table.impairment tbody tr.highlighted { background: var(--rose-light); }
+  table.impairment tbody tr.highlighted td { color: var(--rose); font-weight: 700; }
+  table.impairment tbody tr.highlighted td.sep { background: var(--bg); color: var(--slate); }
+
+  /* Totals row */
+  table.impairment tbody tr.row-total td {
+    border-top: 2px solid var(--navy);
+    border-bottom: 2.5px double var(--navy);
+    font-weight: 700; font-size: 12.5px;
+    background: #f8fafc;
+  }
+  table.impairment tbody tr.row-total td:first-child {
+    color: var(--rose); font-family: var(--font-sans);
+  }
+  table.impairment tbody tr.row-total td.loss-disc {
+    color: var(--rose); font-size: 13.5px;
+  }
+  table.impairment tbody tr.row-total { cursor: default; }
+  table.impairment tbody tr.row-total:hover { background: #f8fafc; }
+
+  /* ── Formulas section ── */
+  .formulas {
+    margin-top: 20px; padding: 16px 18px;
+    background: #f8fafc; border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .formulas-title {
+    font-size: 10px; font-weight: 700; color: var(--slate-light);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;
+  }
+  .formula-row {
+    font-family: var(--font-mono); font-size: 12.5px;
+    color: var(--navy); margin-bottom: 6px; line-height: 1.6;
+  }
+  .formula-row .f-label {
+    font-weight: 700; display: inline;
+  }
+  .formula-row .f-muted { color: var(--slate-light); }
+  .formula-row .f-result { font-weight: 700; }
+  .formula-row .f-loss { color: var(--rose); font-weight: 700; }
+
+  /* ── Summary cards ── */
+  .summary {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 10px; margin-top: 16px;
+  }
+  .summary-card {
+    border-radius: 10px; padding: 12px 14px;
+    border: 1px solid var(--border);
+  }
+  .summary-card.sc-neutral { background: #f8fafc; }
+  .summary-card.sc-loss { background: var(--rose-light); border-color: rgba(190,18,60,0.2); }
+  .summary-card .sc-label {
+    font-size: 10px; font-weight: 700; color: var(--slate-light);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;
+  }
+  .summary-card.sc-loss .sc-label { color: var(--rose); }
+  .summary-card .sc-value {
+    font-size: 16px; font-weight: 700; color: var(--navy);
+    font-family: var(--font-mono);
+  }
+  .summary-card.sc-loss .sc-value { color: var(--rose); }
+  .summary-card .sc-detail {
+    font-size: 11px; color: var(--slate-light); margin-top: 2px;
+    font-family: var(--font-mono);
+  }
+
+  .footer {
+    max-width: 1200px; margin: 16px auto 0;
+    font-size: 11px; color: var(--slate-light); text-align: center;
+  }
+
+  @media (max-width: 500px) {
+    body { padding: 12px 8px; }
+    .panel { padding: 16px; }
+    .header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <div class="header">
+    <h1>Impairment — Expected Credit Loss</h1>
+    <p>Investment measured at Amortized Cost · Configure parameters → click rows to highlight → copy for slides</p>
+  </div>
+
+  <div class="grid">
+    <div class="panel controls">
+      <div class="section-label">Investment Parameters</div>
+      <div class="fields">
+        <div class="field">
+          <label>Title</label>
+          <input id="title" value="Impairment (Investment Measured at AC)">
+        </div>
+        <div class="row-curr">
+          <div class="field">
+            <label>Currency</label>
+            <select id="currency">
+              <option value="€" selected>€</option>
+              <option value="$">$</option>
+              <option value="£">£</option>
+              <option value="¥">¥</option>
+              <option value="CHF">CHF</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Face Value</label>
+            <input type="number" id="faceValue" value="200000" step="10000">
+          </div>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Contractual Rate (%)</label>
+            <input type="number" id="contractRate" value="10" step="0.5" min="0" max="30">
+          </div>
+          <div class="field">
+            <label>Original EIR (%)</label>
+            <input type="number" id="eirRate" value="10" step="0.5" min="0.5" max="30">
+          </div>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Periods</label>
+            <input type="number" id="periods" value="4" min="1" max="20">
+          </div>
+          <div class="field">
+            <label>Start Year</label>
+            <input type="number" id="startYear" value="2024" min="1990" max="2050">
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section-label">Impairment Scenario</div>
+      <div class="fields">
+        <div class="field">
+          <label>Expected Coupon Rate (%)</label>
+          <input type="number" id="expectedRate" value="8" step="0.5" min="0" max="30">
+        </div>
+        <div class="field">
+          <label>Expected Principal Recovery (%)</label>
+          <input type="number" id="recoveryPct" value="100" step="5" min="0" max="100">
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section-label">Display</div>
+      <div class="toggles">
+        <label class="toggle"><input type="checkbox" id="showFormulas" checked> Show Formulas</label>
+        <label class="toggle"><input type="checkbox" id="showSummary" checked> Show Summary Cards</label>
+      </div>
+
+      <hr class="divider">
+
+      <div class="actions">
+        <button class="action-btn btn-teal" onclick="copyAsPNG()">📋 Copy as PNG (3×)</button>
+        <button class="action-btn btn-navy" onclick="downloadCSV()">⬇ Download CSV</button>
+      </div>
+      <div id="toast" class="toast"></div>
+    </div>
+
+    <div class="panel table-wrap" id="captureArea">
+      <div id="tableContainer"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Click any row to highlight it in red for presentation &nbsp;·&nbsp; Discounted at original effective interest rate (IFRS 9) &nbsp;·&nbsp; FA3 — Financial Accounting 3, Amsterdam Business School
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const inputIds = ["title","faceValue","contractRate","eirRate","expectedRate","recoveryPct","periods","startYear","currency","showFormulas","showSummary"];
+
+inputIds.forEach(id => {
+  const el = $(id);
+  el.addEventListener("input", render);
+  el.addEventListener("change", render);
+});
+
+function fmt(n) { return Math.round(n).toLocaleString("en-US"); }
+function pvF(r, n) { return 1 / Math.pow(1 + r, n); }
+function pvAF(r, n) { return (1 - Math.pow(1 + r, -n)) / r; }
+function esc(s) { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function render() {
+  const title      = $("title").value;
+  const faceVal    = parseFloat($("faceValue").value) || 0;
+  const contractR  = parseFloat($("contractRate").value) || 0;
+  const eirR       = parseFloat($("eirRate").value) || 0.5;
+  const expectedR  = parseFloat($("expectedRate").value) || 0;
+  const recoveryP  = Math.min(100, Math.max(0, parseFloat($("recoveryPct").value) || 100));
+  const periods    = Math.max(1, Math.min(20, parseInt($("periods").value) || 4));
+  const startYear  = parseInt($("startYear").value) || 2024;
+  const curr       = $("currency").value;
+  const showForm   = $("showFormulas").checked;
+  const showSum    = $("showSummary").checked;
+
+  const eir = eirR / 100;
+  const contractCoupon = faceVal * (contractR / 100);
+  const expectedCoupon = faceVal * (expectedR / 100);
+  const expectedPrincipal = faceVal * (recoveryP / 100);
+  const lossCoupon = contractCoupon - expectedCoupon;
+  const lossPrincipal = faceVal - expectedPrincipal;
+
+  const pvfP = pvF(eir, periods);
+  const pvfA = pvAF(eir, periods);
+
+  // Build rows
+  const rows = [];
+  let totContractNom = 0, totContractDisc = 0;
+  let totExpectedNom = 0, totExpectedDisc = 0;
+  let totLossNom = 0, totLossDisc = 0;
+
+  for (let i = 1; i <= periods; i++) {
+    const isLast = (i === periods);
+    const factor = pvF(eir, i);
+
+    const cNom = isLast ? contractCoupon + faceVal : contractCoupon;
+    const cDisc = cNom * factor;
+
+    const eNom = isLast ? expectedCoupon + expectedPrincipal : expectedCoupon;
+    const eDisc = eNom * factor;
+
+    const lNom = cNom - eNom;
+    const lDisc = cDisc - eDisc;
+
+    totContractNom += cNom;  totContractDisc += cDisc;
+    totExpectedNom += eNom;  totExpectedDisc += eDisc;
+    totLossNom += lNom;      totLossDisc += lDisc;
+
+    rows.push({
+      date: startYear + i,
+      cNom, cDisc, eNom, eDisc, lNom, lDisc
+    });
+  }
+
+  // DCF totals
+  const dcfContractual = faceVal * pvfP + contractCoupon * pvfA;
+  const dcfExpected = expectedPrincipal * pvfP + expectedCoupon * pvfA;
+  const dcfLoss = dcfContractual - dcfExpected;
+
+  // ── Build HTML ──
+  let html = '';
+
+  html += `<div class="schedule-title">${esc(title)}</div>`;
+  html += `<div class="schedule-subtitle">Effective-Interest Method &nbsp;·&nbsp; Original EIR = ${eirR}%</div>`;
+
+  // Table
+  html += `<table class="impairment" id="impairmentTable"><thead>`;
+
+  // Group header
+  html += `<tr class="group-row">`;
+  html += `<th class="col-date" rowspan="2" style="background:var(--navy);padding:8px 12px;text-align:left;color:#fff;vertical-align:bottom;">December 31</th>`;
+  html += `<th class="sep" rowspan="2"></th>`;
+  html += `<th class="grp-contractual" colspan="2">Contractual CFs</th>`;
+  html += `<th class="sep" rowspan="2"></th>`;
+  html += `<th class="grp-expected" colspan="2">Expected CFs</th>`;
+  html += `<th class="sep" rowspan="2"></th>`;
+  html += `<th class="grp-loss" colspan="2">Loss of CF</th>`;
+  html += `</tr>`;
+
+  // Sub header
+  html += `<tr class="sub-row">`;
+  html += `<th>Nominal</th><th>Discounted</th>`;
+  html += `<th>Nominal</th><th>Discounted</th>`;
+  html += `<th class="sub-loss">Nominal</th><th class="sub-loss">Discounted</th>`;
+  html += `</tr>`;
+
+  html += `</thead><tbody>`;
+
+  // Data rows
+  rows.forEach((r, i) => {
+    html += `<tr onclick="toggleHighlight(this)">`;
+    html += `<td>${r.date}</td>`;
+    html += `<td class="sep"></td>`;
+    html += `<td>${curr}${fmt(r.cNom)}</td>`;
+    html += `<td>${curr}${fmt(r.cDisc)}</td>`;
+    html += `<td class="sep"></td>`;
+    html += `<td>${curr}${fmt(r.eNom)}</td>`;
+    html += `<td>${curr}${fmt(r.eDisc)}</td>`;
+    html += `<td class="sep"></td>`;
+    html += `<td>${curr}${fmt(r.lNom)}</td>`;
+    html += `<td>${curr}${fmt(r.lDisc)}</td>`;
+    html += `</tr>`;
+  });
+
+  // Totals row
+  html += `<tr class="row-total">`;
+  html += `<td>Total Cash Flows</td>`;
+  html += `<td class="sep"></td>`;
+  html += `<td>${curr}${fmt(totContractNom)}</td>`;
+  html += `<td style="font-weight:800">${curr}${fmt(totContractDisc)}</td>`;
+  html += `<td class="sep"></td>`;
+  html += `<td>${curr}${fmt(totExpectedNom)}</td>`;
+  html += `<td style="font-weight:800">${curr}${fmt(totExpectedDisc)}</td>`;
+  html += `<td class="sep"></td>`;
+  html += `<td>${curr}${fmt(totLossNom)}</td>`;
+  html += `<td class="loss-disc">${curr}${fmt(totLossDisc)}</td>`;
+  html += `</tr>`;
+
+  html += `</tbody></table>`;
+
+  // Formulas
+  if (showForm) {
+    html += `<div class="formulas">`;
+    html += `<div class="formulas-title">Discount Factors & DCF Calculations</div>`;
+
+    html += `<div class="formula-row"><span class="f-label">PVF<sub>P</sub></span> <span class="f-muted">= (1 / 1.${(eirR*10).toFixed(0).padStart(1,'0')}<sup>${periods}</sup>)</span> = <span class="f-result">${pvfP.toFixed(7)}</span></div>`;
+    html += `<div class="formula-row"><span class="f-label">PVF<sub>A</sub></span> <span class="f-muted">= (1/${eir}) × (1 − 1/1.${(eirR*10).toFixed(0).padStart(1,'0')}<sup>${periods}</sup>)</span> = <span class="f-result">${pvfA.toFixed(7)}</span></div>`;
+
+    html += `<div style="border-top:1px solid var(--border);margin:8px 0;"></div>`;
+
+    html += `<div class="formula-row"><span class="f-label">DCF<sub>Contractual</sub></span> <span class="f-muted">= ${curr}${fmt(faceVal)} × ${pvfP.toFixed(7)} + ${curr}${fmt(contractCoupon)} × ${pvfA.toFixed(7)}</span> = <span class="f-result">${curr}${fmt(dcfContractual)}</span></div>`;
+    html += `<div class="formula-row"><span class="f-label">DCF<sub>Expected</sub></span> <span class="f-muted">= ${curr}${fmt(expectedPrincipal)} × ${pvfP.toFixed(7)} + ${curr}${fmt(expectedCoupon)} × ${pvfA.toFixed(7)}</span> = <span class="f-result">${curr}${fmt(dcfExpected)}</span></div>`;
+
+    html += `<div style="border-top:1px solid var(--border);margin:8px 0;"></div>`;
+
+    if (Math.abs(lossPrincipal) < 0.50) {
+      // Loss only on annuity
+      html += `<div class="formula-row"><span class="f-label f-loss">DCF<sub>Loss</sub></span> <span class="f-muted">= ${curr}${fmt(lossCoupon)} × ${pvfA.toFixed(7)}</span> = <span class="f-loss">${curr}${fmt(dcfLoss)}</span></div>`;
+    } else {
+      // Loss on both
+      html += `<div class="formula-row"><span class="f-label f-loss">DCF<sub>Loss</sub></span> <span class="f-muted">= ${curr}${fmt(lossPrincipal)} × ${pvfP.toFixed(7)} + ${curr}${fmt(lossCoupon)} × ${pvfA.toFixed(7)}</span> = <span class="f-loss">${curr}${fmt(dcfLoss)}</span></div>`;
+    }
+
+    html += `</div>`;
+  }
+
+  // Summary cards
+  if (showSum) {
+    html += `<div class="summary">`;
+    html += summaryCard("DCF Contractual", `${curr}${fmt(dcfContractual)}`, `PV at EIR ${eirR}%`, false);
+    html += summaryCard("DCF Expected", `${curr}${fmt(dcfExpected)}`, `Recovery: ${recoveryP}% principal`, false);
+    html += summaryCard("Expected Credit Loss", `${curr}${fmt(dcfLoss)}`, `${(dcfLoss/dcfContractual*100).toFixed(1)}% of carrying amount`, true);
+
+    const nominalLoss = totContractNom - totExpectedNom;
+    html += summaryCard("Nominal Loss (undiscounted)", `${curr}${fmt(nominalLoss)}`, `Not used for IFRS 9 ECL`, false);
+    html += `</div>`;
+  }
+
+  $("tableContainer").innerHTML = html;
+}
+
+function summaryCard(label, value, detail, isLoss) {
+  const cls = isLoss ? "summary-card sc-loss" : "summary-card sc-neutral";
+  return `<div class="${cls}"><div class="sc-label">${label}</div><div class="sc-value">${value}</div><div class="sc-detail">${detail}</div></div>`;
+}
+
+function toggleHighlight(tr) {
+  if (tr.classList.contains("row-total")) return;
+  tr.classList.toggle("highlighted");
+}
+
+// ─── Export: Copy as PNG ───
+async function copyAsPNG() {
+  const area = $("captureArea");
+  if (!area) return;
+  try {
+    const w = area.scrollWidth;
+    const h = area.scrollHeight;
+    const scale = 3;
+
+    const styles = document.querySelectorAll("style");
+    let cssText = "";
+    styles.forEach(s => { cssText += s.textContent; });
+
+    const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+      <foreignObject width="100%" height="100%">
+        <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">
+          <style>${cssText}
+          .table-wrap{padding:20px;background:#fff;border-radius:0;box-shadow:none;}
+          </style>
+          ${area.innerHTML}
+        </div>
+      </foreignObject>
+    </svg>`;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w * scale;
+    canvas.height = h * scale;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(scale, scale);
+
+    const img = new Image();
+    const blob = new Blob([svgStr], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    URL.revokeObjectURL(url);
+
+    canvas.toBlob(async (b) => {
+      try {
+        await navigator.clipboard.write([ new ClipboardItem({ "image/png": b }) ]);
+        showToast("Copied to clipboard!", "success");
+      } catch {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(b);
+        a.download = "impairment_ecl.png";
+        a.click();
+        showToast("Downloaded as PNG (clipboard not available)", "success");
+      }
+    }, "image/png");
+  } catch (err) {
+    showToast("Error: " + err.message, "error");
+  }
+}
+
+// ─── Export: Download CSV ───
+function downloadCSV() {
+  const faceVal    = parseFloat($("faceValue").value) || 0;
+  const contractR  = parseFloat($("contractRate").value) || 0;
+  const eirR       = parseFloat($("eirRate").value) || 0.5;
+  const expectedR  = parseFloat($("expectedRate").value) || 0;
+  const recoveryP  = parseFloat($("recoveryPct").value) || 100;
+  const periods    = Math.max(1, Math.min(20, parseInt($("periods").value) || 4));
+  const startYear  = parseInt($("startYear").value) || 2024;
+  const eir = eirR / 100;
+  const cc = faceVal * (contractR / 100);
+  const ec = faceVal * (expectedR / 100);
+  const ep = faceVal * (recoveryP / 100);
+
+  let csv = "Date,Contract Nominal,Contract Discounted,Expected Nominal,Expected Discounted,Loss Nominal,Loss Discounted\n";
+  for (let i = 1; i <= periods; i++) {
+    const f = pvF(eir, i);
+    const isLast = i === periods;
+    const cN = isLast ? cc + faceVal : cc;
+    const eN = isLast ? ec + ep : ec;
+    csv += `Dec 31 ${startYear+i},${Math.round(cN)},${Math.round(cN*f)},${Math.round(eN)},${Math.round(eN*f)},${Math.round(cN-eN)},${Math.round((cN-eN)*f)}\n`;
+  }
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "impairment_ecl.csv";
+  a.click();
+  showToast("CSV downloaded", "success");
+}
+
+function showToast(msg, type) {
+  const el = $("toast");
+  el.className = "toast " + type;
+  el.textContent = msg;
+  el.style.display = "block";
+  setTimeout(() => { el.style.display = "none"; }, 2500);
+}
+
+render();
+</script>
+</body>
+</html>
