@@ -14,14 +14,16 @@ website:
     left:
       - text: "Home"
         href: index.qmd
-      - text: "Bond Amortization"
-        href: bond-amortization.qmd
       - text: "DCF Timeline"
-        href: dcf-timeline.qmd
+        href: DCF-Timeline.qmd
+      - text: "Accrued Interest"
+        href: Accrued-Interest.qmd
+      - text: "Bond Amortization"
+        href: Bond-Amortization.qmd
       - text: "Impairment & ECL"
-        href: impairment-ecl.qmd
+        href: Impairment-ECL.qmd
   page-footer:
-    center: "Financial Accounting 3 — Amsterdam Business School, University of Amsterdam"
+    center: "Financial Accounting 3<br>Amsterdam Business School, University of Amsterdam<br>Matthias Uckert"
     background: "#1a2744"
 
 format:

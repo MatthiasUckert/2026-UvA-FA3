@@ -1,0 +1,11 @@
+---
+title: ""
+format:
+  html:
+    toc: false
+---
+
+```{=html}
+<iframe class="tool-embed" src="tools/Bond-Amortization-Schedule-V1.html"></iframe>
+<p class="embed-note">If the tool does not load, <a href="tools/Bond-Amortization-Schedule-V1.html" target="_blank">open it directly</a>.</p>
+```

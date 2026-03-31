@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "FA3 — Interactive Tools",
     "section": "",
-    "text": "Financial Accounting 3 · Amsterdam Business School · University of Amsterdam\n\n  \n    \n      📊\n      Bond Amortization Schedule\n      Build and explore effective-interest amortization tables for bonds issued at a premium or discount.\n    \n\n    \n      📐\n      DCF Timeline Generator\n      Visualize discounted cash flow timelines — map out coupon payments, principal, and present values.\n    \n\n    \n      ⚠️\n      Impairment — Expected Credit Loss\n      Walk through the IFRS 9 expected credit loss model with interactive staging and calculations."
+    "text": "Financial Accounting 3 · Amsterdam Business School · University of AmsterdamMatthias Uckert\n\n  \n    \n      📐\n      DCF Timeline Generator\n      Visualize discounted cash flow timelines — map out coupon payments, principal, and present values.\n    \n    \n    \n      ⏳\n      Accrued Interest Simulator\n      Visualize discounted cash flow timelines — map out coupon payments, principal, and present values.\n    \n    \n    \n      📊\n      Bond Amortization Schedule\n      Build and explore effective-interest amortization tables for bonds issued at a premium or discount.\n    \n\n    \n      ⚠️\n      Impairment — Expected Credit Loss\n      Walk through the IFRS 9 expected credit loss model with interactive staging and calculations."
   },
   {
     "objectID": "impairment-ecl.html",
@@ -23,6 +23,34 @@
   {
     "objectID": "bond-amortization.html",
     "href": "bond-amortization.html",
+    "title": "FA3 — Interactive Tools",
+    "section": "",
+    "text": "If the tool does not load, open it directly."
+  },
+  {
+    "objectID": "Accrued-Interest.html",
+    "href": "Accrued-Interest.html",
+    "title": "FA3 — Interactive Tools",
+    "section": "",
+    "text": "If the tool does not load, open it directly."
+  },
+  {
+    "objectID": "DCF-Timeline.html",
+    "href": "DCF-Timeline.html",
+    "title": "FA3 — Interactive Tools",
+    "section": "",
+    "text": "If the tool does not load, open it directly."
+  },
+  {
+    "objectID": "Bond-Amortization.html",
+    "href": "Bond-Amortization.html",
+    "title": "FA3 — Interactive Tools",
+    "section": "",
+    "text": "If the tool does not load, open it directly."
+  },
+  {
+    "objectID": "Impairment-ECL.html",
+    "href": "Impairment-ECL.html",
     "title": "FA3 — Interactive Tools",
     "section": "",
     "text": "If the tool does not load, open it directly."

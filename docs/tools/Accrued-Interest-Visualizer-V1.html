@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accrued Interest Visualizer — FA3</title>
+<style>
+  :root {
+    --navy: #1a2744;
+    --teal: #0d9488;
+    --teal-dark: #0f766e;
+    --amber: #d97706;
+    --rose: #be123c;
+    --slate: #475569;
+    --slate-light: #94a3b8;
+    --border: #e2e8f0;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --seller-color: #0d9488;
+    --buyer-color: #6366f1;
+    --seller-bg: #ccfbf1;
+    --buyer-bg: #e0e7ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  .wrapper { max-width: 1100px; margin: 0 auto; }
+
+  .header { margin-bottom: 24px; }
+  .header h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 28px; font-weight: 700; color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .header p { font-size: 13px; color: var(--slate-light); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  @media (max-width: 780px) {
+    .grid { grid-template-columns: 1fr; }
+    .controls { position: static !important; }
+  }
+
+  .panel {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+
+  .controls { position: sticky; top: 24px; align-self: start; }
+
+  .section-label {
+    font-size: 10px; font-weight: 700; color: var(--slate-light);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .divider { border: none; border-top: 1px solid #f1f5f9; margin: 16px 0; }
+
+  .fields { display: grid; gap: 12px; }
+  .field label {
+    display: block; font-size: 10px; font-weight: 700;
+    color: var(--slate-light); text-transform: uppercase;
+    letter-spacing: 0.05em; margin-bottom: 4px;
+  }
+  .field input, .field select {
+    width: 100%; padding: 8px 10px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: inherit; color: var(--navy);
+    outline: none; transition: border-color 0.15s;
+    background: var(--card);
+  }
+  .field input:focus, .field select:focus { border-color: var(--teal); }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .action-btn {
+    width: 100%;
+    padding: 10px 16px; border-radius: 8px; border: none;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: all 0.15s; color: #fff;
+  }
+  .action-btn:active { transform: scale(0.97); }
+  .btn-teal { background: var(--teal); }
+  .btn-teal:hover { background: var(--teal-dark); }
+
+  /* === Chart area === */
+  .chart-area { padding: 20px; }
+
+  .chart-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+
+  canvas { display: block; width: 100%; }
+
+  /* Slider */
+  .slider-row {
+    display: flex; align-items: center; gap: 12px;
+    margin: 20px 0 8px;
+  }
+  .slider-row label {
+    font-size: 12px; font-weight: 700; color: var(--slate);
+    white-space: nowrap; min-width: 70px;
+  }
+  .slider-row input[type=range] {
+    flex: 1; accent-color: var(--rose);
+    height: 6px; cursor: pointer;
+  }
+  .slider-date {
+    font-family: 'Consolas', 'Menlo', monospace;
+    font-size: 14px; font-weight: 700; color: var(--rose);
+    min-width: 100px; text-align: right;
+  }
+
+  /* Info cards */
+  .info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  @media (max-width: 600px) {
+    .info-row { grid-template-columns: 1fr; }
+  }
+
+  .info-card {
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .info-card .info-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; margin-bottom: 4px;
+  }
+  .info-card .info-value {
+    font-family: 'Consolas', 'Menlo', monospace;
+    font-size: 22px; font-weight: 700;
+  }
+  .info-card .info-sub {
+    font-size: 11px; margin-top: 4px; opacity: 0.8;
+  }
+
+  .card-seller {
+    background: var(--seller-bg); color: var(--seller-color);
+  }
+  .card-buyer {
+    background: var(--buyer-bg); color: var(--buyer-color);
+  }
+  .card-total {
+    background: #fef3c7; color: var(--amber);
+  }
+
+  /* Explanation box */
+  .explanation {
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border-radius: 10px;
+    border-left: 4px solid var(--teal);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--slate);
+  }
+  .explanation strong { color: var(--navy); }
+  .explanation .formula {
+    font-family: 'Consolas', 'Menlo', monospace;
+    background: #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--navy);
+  }
+
+  .footer {
+    max-width: 1100px; margin: 16px auto 0;
+    font-size: 11px; color: var(--slate-light); text-align: center;
+  }
+
+  @media (max-width: 500px) {
+    body { padding: 12px 8px; }
+    .panel { padding: 16px; }
+    .header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <div class="header">
+    <h1>Accrued Interest Visualizer</h1>
+    <p>See how bond interest accrues daily and what happens when a bond is sold between coupon dates</p>
+  </div>
+
+  <div class="grid">
+    <!-- Controls -->
+    <div class="panel controls">
+      <div class="section-label">Bond Parameters</div>
+      <div class="fields">
+        <div class="field">
+          <label>Face Value (€)</label>
+          <input id="faceValue" type="number" value="100000" min="1000" step="1000">
+        </div>
+        <div class="field">
+          <label>Annual Coupon Rate (%)</label>
+          <input id="couponRate" type="number" value="8" min="0.5" max="20" step="0.5">
+        </div>
+        <div class="field">
+          <label>Coupon Frequency</label>
+          <select id="frequency">
+            <option value="2" selected>Semi-Annual</option>
+            <option value="1">Annual</option>
+            <option value="4">Quarterly</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Period Start</label>
+          <input id="periodStart" type="date" value="2027-07-01">
+        </div>
+        <div class="field">
+          <label>Period End</label>
+          <input id="periodEnd" type="date" value="2028-01-01">
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section-label">Presets</div>
+      <div class="fields">
+        <button class="action-btn btn-teal" onclick="loadRobinson()">
+          Load Robinson SA Example
+        </button>
+      </div>
+    </div>
+
+    <!-- Visualization -->
+    <div class="panel chart-area">
+      <div class="section-label">Interest Accrual Between Coupon Dates</div>
+
+      <div class="chart-container">
+        <canvas id="chart" height="280"></canvas>
+      </div>
+
+      <div class="slider-row">
+        <label>Sale Date:</label>
+        <input type="range" id="saleSlider" min="1" max="100" value="67">
+        <span class="slider-date" id="saleDateLabel">Nov 1, 2027</span>
+      </div>
+
+      <div class="info-row">
+        <div class="info-card card-seller">
+          <div class="info-label">Seller Earns</div>
+          <div class="info-value" id="sellerAmount">€2,667</div>
+          <div class="info-sub" id="sellerDays">122 days</div>
+        </div>
+        <div class="info-card card-buyer">
+          <div class="info-label">Buyer's Portion</div>
+          <div class="info-value" id="buyerAmount">€1,333</div>
+          <div class="info-sub" id="buyerDays">62 days</div>
+        </div>
+        <div class="info-card card-total">
+          <div class="info-label">Total Coupon</div>
+          <div class="info-value" id="totalCoupon">€4,000</div>
+          <div class="info-sub" id="totalDays">184 days</div>
+        </div>
+      </div>
+
+      <div class="explanation" id="explanationBox">
+        Loading...
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Financial Accounting 3 — University of Amsterdam · System fonts only · No external dependencies
+  </div>
+</div>
+
+<script>
+// ─── State ───
+const $ = id => document.getElementById(id);
+const canvas = $('chart');
+const ctx = canvas.getContext('2d');
+
+function getParams() {
+  const faceValue = parseFloat($('faceValue').value) || 100000;
+  const couponRate = parseFloat($('couponRate').value) || 8;
+  const freq = parseInt($('frequency').value) || 2;
+  const periodStart = new Date($('periodStart').value + 'T00:00:00');
+  const periodEnd = new Date($('periodEnd').value + 'T00:00:00');
+  const couponPayment = faceValue * (couponRate / 100) / freq;
+  const totalDays = Math.round((periodEnd - periodStart) / 86400000);
+  return { faceValue, couponRate, freq, periodStart, periodEnd, couponPayment, totalDays };
+}
+
+function getSaleDay() {
+  return parseInt($('saleSlider').value);
+}
+
+function dayToDate(params, day) {
+  const d = new Date(params.periodStart);
+  d.setDate(d.getDate() + day);
+  return d;
+}
+
+function formatDate(d) {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}
+
+function formatEuro(n) {
+  return '€' + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+// ─── Drawing ───
+function draw() {
+  const params = getParams();
+  const pct = getSaleDay() / 100;
+  const saleDay = Math.round(pct * params.totalDays);
+  const saleDaysClamped = Math.max(1, Math.min(saleDay, params.totalDays));
+
+  const saleDate = dayToDate(params, saleDaysClamped);
+  const sellerDays = saleDaysClamped;
+  const buyerDays = params.totalDays - saleDaysClamped;
+  const dailyInterest = params.couponPayment / params.totalDays;
+  const sellerAmount = dailyInterest * sellerDays;
+  const buyerAmount = dailyInterest * buyerDays;
+
+  // Update labels
+  $('saleDateLabel').textContent = formatDate(saleDate);
+  $('sellerAmount').textContent = formatEuro(sellerAmount);
+  $('buyerAmount').textContent = formatEuro(buyerAmount);
+  $('totalCoupon').textContent = formatEuro(params.couponPayment);
+  $('sellerDays').textContent = `${sellerDays} day${sellerDays !== 1 ? 's' : ''}`;
+  $('buyerDays').textContent = `${buyerDays} day${buyerDays !== 1 ? 's' : ''}`;
+  $('totalDays').textContent = `${params.totalDays} days total`;
+
+  // Explanation
+  const monthsSeller = (sellerDays / params.totalDays * (12 / params.freq)).toFixed(1);
+  const monthsPeriod = (12 / params.freq);
+  $('explanationBox').innerHTML =
+    `<strong>How it works:</strong> The coupon of <span class="formula">${formatEuro(params.couponPayment)}</span> covers ` +
+    `<strong>${params.totalDays} days</strong> (${formatDate(params.periodStart)} → ${formatDate(params.periodEnd)}). ` +
+    `Interest accrues at <span class="formula">${formatEuro(params.couponPayment)} ÷ ${params.totalDays} = ${formatEuro(dailyInterest)}/day</span>.<br><br>` +
+    `If the bond is sold on <strong>${formatDate(saleDate)}</strong>, the <strong style="color:var(--seller-color)">seller</strong> ` +
+    `held it for <strong>${sellerDays} days</strong> and is entitled to ` +
+    `<span class="formula">${formatEuro(dailyInterest)} × ${sellerDays} = ${formatEuro(sellerAmount)}</span> of accrued interest.<br><br>` +
+    `The <strong style="color:var(--buyer-color)">buyer</strong> pays this accrued interest on top of the purchase price. ` +
+    `When the next coupon of ${formatEuro(params.couponPayment)} arrives on ${formatDate(params.periodEnd)}, ` +
+    `the buyer receives the full coupon — but effectively only "earns" ` +
+    `<span class="formula">${formatEuro(buyerAmount)}</span> (their ${buyerDays}-day portion).`;
+
+  // Canvas sizing
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const W = rect.width;
+  const H = 280;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  // Layout
+  const pad = { top: 40, right: 30, bottom: 60, left: 60 };
+  const cw = W - pad.left - pad.right;
+  const ch = H - pad.top - pad.bottom;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + ch - (i / 4) * ch;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(pad.left + cw, y);
+    ctx.stroke();
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '11px system-ui';
+    ctx.textAlign = 'right';
+    ctx.fillText(formatEuro(params.couponPayment * i / 4), pad.left - 8, y + 4);
+  }
+
+  // Sale position in chart
+  const saleX = pad.left + (saleDaysClamped / params.totalDays) * cw;
+  const baseY = pad.top + ch;
+
+  // ─── Seller area (filled, left of sale) ───
+  ctx.beginPath();
+  ctx.moveTo(pad.left, baseY);
+  for (let d = 0; d <= saleDaysClamped; d++) {
+    const x = pad.left + (d / params.totalDays) * cw;
+    const val = dailyInterest * d;
+    const y = baseY - (val / params.couponPayment) * ch;
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(saleX, baseY);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(13, 148, 136, 0.25)';
+  ctx.fill();
+
+  // ─── Buyer area (filled, right of sale) ───
+  ctx.beginPath();
+  ctx.moveTo(saleX, baseY);
+  // The buyer's accrual starts at the seller's endpoint
+  const sellerEndVal = dailyInterest * saleDaysClamped;
+  const sellerEndY = baseY - (sellerEndVal / params.couponPayment) * ch;
+  ctx.lineTo(saleX, sellerEndY);
+  for (let d = saleDaysClamped; d <= params.totalDays; d++) {
+    const x = pad.left + (d / params.totalDays) * cw;
+    const val = dailyInterest * d;
+    const y = baseY - (val / params.couponPayment) * ch;
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(pad.left + cw, baseY);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(99, 102, 241, 0.18)';
+  ctx.fill();
+
+  // ─── Accrual line (full) ───
+  ctx.beginPath();
+  ctx.moveTo(pad.left, baseY);
+  for (let d = 0; d <= params.totalDays; d++) {
+    const x = pad.left + (d / params.totalDays) * cw;
+    const val = dailyInterest * d;
+    const y = baseY - (val / params.couponPayment) * ch;
+    ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = var_navy();
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // ─── Sale line (vertical dashed) ───
+  ctx.setLineDash([6, 4]);
+  ctx.strokeStyle = '#be123c';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(saleX, pad.top - 5);
+  ctx.lineTo(saleX, baseY + 5);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Sale label
+  ctx.fillStyle = '#be123c';
+  ctx.font = 'bold 11px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('SALE', saleX, pad.top - 10);
+
+  // Seller arrow + label
+  const sellerMidX = pad.left + (saleDaysClamped / 2 / params.totalDays) * cw;
+  const sellerMidVal = dailyInterest * saleDaysClamped / 2;
+  const sellerLabelY = baseY - (sellerMidVal / params.couponPayment) * ch + 20;
+  ctx.fillStyle = 'rgba(13, 148, 136, 0.9)';
+  ctx.font = 'bold 12px system-ui';
+  ctx.textAlign = 'center';
+  if (cw * (saleDaysClamped / params.totalDays) > 80) {
+    ctx.fillText('Seller\'s portion', sellerMidX, Math.min(sellerLabelY, baseY - 10));
+  }
+
+  // Buyer label
+  const buyerMidX = saleX + ((params.totalDays - saleDaysClamped) / 2 / params.totalDays) * cw;
+  const buyerMidDay = saleDaysClamped + (params.totalDays - saleDaysClamped) / 2;
+  const buyerMidVal = dailyInterest * buyerMidDay;
+  const buyerLabelY = baseY - ((buyerMidVal - sellerEndVal) / 2 + sellerEndVal) / params.couponPayment * ch + 5;
+  ctx.fillStyle = 'rgba(99, 102, 241, 0.9)';
+  if (cw * (buyerDays / params.totalDays) > 80) {
+    ctx.fillText('Buyer\'s portion', buyerMidX, Math.min(buyerLabelY, baseY - 10));
+  }
+
+  // X-axis: period start and end
+  ctx.fillStyle = '#475569';
+  ctx.font = 'bold 12px system-ui';
+  ctx.textAlign = 'start';
+  ctx.fillText(formatDate(params.periodStart), pad.left, baseY + 20);
+  ctx.textAlign = 'end';
+  ctx.fillText(formatDate(params.periodEnd), pad.left + cw, baseY + 20);
+
+  // Coupon labels at start/end
+  ctx.font = '11px system-ui';
+  ctx.fillStyle = '#94a3b8';
+  ctx.textAlign = 'start';
+  ctx.fillText('Coupon date', pad.left, baseY + 34);
+  ctx.textAlign = 'end';
+  ctx.fillText('Next coupon date', pad.left + cw, baseY + 34);
+
+  // Sale date on x-axis
+  ctx.fillStyle = '#be123c';
+  ctx.font = '11px system-ui';
+  ctx.textAlign = 'center';
+  const saleLabelX = Math.max(pad.left + 50, Math.min(saleX, pad.left + cw - 50));
+  ctx.fillText(formatDate(saleDate), saleLabelX, baseY + 50);
+
+  // Accrued interest marker on the line at sale point
+  const markerY = baseY - (sellerEndVal / params.couponPayment) * ch;
+  ctx.beginPath();
+  ctx.arc(saleX, markerY, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#be123c';
+  ctx.fill();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Value at marker
+  ctx.fillStyle = '#be123c';
+  ctx.font = 'bold 12px Consolas, Menlo, monospace';
+  ctx.textAlign = saleX > pad.left + cw / 2 ? 'right' : 'left';
+  const nudge = saleX > pad.left + cw / 2 ? -12 : 12;
+  ctx.fillText(formatEuro(sellerEndVal), saleX + nudge, markerY - 10);
+}
+
+function var_navy() { return '#1a2744'; }
+
+// ─── Preset ───
+function loadRobinson() {
+  $('faceValue').value = 100000;
+  $('couponRate').value = 8;
+  $('frequency').value = '2';
+  $('periodStart').value = '2027-07-01';
+  $('periodEnd').value = '2028-01-01';
+  // Set slider to Nov 1 = ~122/184 days
+  $('saleSlider').value = Math.round(123 / 184 * 100);
+  draw();
+}
+
+// ─── Events ───
+['faceValue', 'couponRate', 'frequency', 'periodStart', 'periodEnd'].forEach(id => {
+  $(id).addEventListener('input', () => {
+    // Update slider max conceptually (always 1-100%)
+    draw();
+  });
+});
+
+$('saleSlider').addEventListener('input', draw);
+
+window.addEventListener('resize', draw);
+
+// ─── Init ───
+loadRobinson();
+</script>
+
+</body>
+</html>
